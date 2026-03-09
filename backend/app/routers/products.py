@@ -19,7 +19,7 @@ router = APIRouter(prefix="/products", tags=["Products"])
 async def list_products(conn: asyncpg.Connection = Depends(get_db_connection)):
     """Fetch all products from the database."""
     records = await products_model.get_all(conn)
-    return {"success": True, "data": records}
+    return {"success": True, "data": [dict(r) for r in records]}
 
 # GET /products/{product_id}: Get details for one product.
 @router.get("/{product_id}", response_model=ProductResponse)
@@ -37,7 +37,7 @@ async def get_product(product_id: int, conn: asyncpg.Connection = Depends(get_db
                 }
             }
         )
-    return {"success": True, "data": record}
+    return {"success": True, "data": dict(record)}
 
 # POST /products: Create a new product.
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
@@ -46,10 +46,8 @@ async def create_product(product: ProductCreate, conn: asyncpg.Connection = Depe
     try:
         # We try to create the product.
         record = await products_model.create(conn, product)
-        return {"success": True, "data": record}
+        return {"success": True, "data": dict(record)}
     except asyncpg.exceptions.ForeignKeyViolationError:
-        # If the provider_id doesn't exist in our 'providers' table, 
-        # the database will reject the insert and throw this error.
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -82,9 +80,8 @@ async def update_product(
                     }
                 }
             )
-        return {"success": True, "data": record}
+        return {"success": True, "data": dict(record)}
     except asyncpg.exceptions.ForeignKeyViolationError:
-        # Also handle potential provider updates that point to non-existent providers.
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={

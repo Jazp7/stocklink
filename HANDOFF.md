@@ -44,20 +44,20 @@ C:\Users\arist\Desktop\stocklink\
 │   ├── app/
 │   │   ├── models/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py     ← EMPTY, needs to be written
-│   │   │   └── providers.py    ← EMPTY, needs to be written
+│   │   │   ├── products.py     ← ✓ DONE
+│   │   │   └── providers.py    ← ✓ DONE
 │   │   ├── routers/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py     ← EMPTY, needs to be written
-│   │   │   └── providers.py    ← EMPTY, needs to be written
+│   │   │   ├── products.py     ← ✓ DONE
+│   │   │   └── providers.py    ← ✓ DONE
 │   │   ├── schemas/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py     ← EMPTY, needs to be written
-│   │   │   └── providers.py    ← EMPTY, needs to be written
+│   │   │   ├── products.py     ← ✓ DONE
+│   │   │   └── providers.py    ← ✓ DONE
 │   │   ├── __init__.py
 │   │   ├── database.py         ← ✓ DONE
-│   │   └── main.py             ← EMPTY, needs to be written
-│   ├── .env                    ← needs DATABASE_URL filled in
+│   │   └── main.py             ← ✓ DONE
+│   ├── .env                    ← ✓ DATABASE_URL filled in
 │   ├── .gitignore
 │   ├── .python-version
 │   ├── pyproject.toml
@@ -65,7 +65,14 @@ C:\Users\arist\Desktop\stocklink\
 ├── frontend/
 │   ├── node_modules/
 │   ├── public/
-│   ├── src/                    ← default Vite files, not customized yet
+│   ├── src/
+│   │   ├── components/         ← ✓ DONE (Layout)
+│   │   ├── pages/              ← ✓ DONE (Placeholders: Dashboard, Products, Providers)
+│   │   ├── services/           ← ✓ DONE (API calls)
+│   │   ├── types/              ← ✓ DONE (TypeScript definitions)
+│   │   ├── App.tsx             ← ✓ DONE (Routing)
+│   │   └── main.tsx            ← ✓ DONE
+│   ├── .env                    ← ✓ VITE_API_URL filled in
 │   ├── .gitignore
 │   ├── eslint.config.js
 │   ├── index.html
@@ -127,56 +134,52 @@ One-to-Many: one provider → many products. `provider_id` is the foreign key in
 
 Installed via `uv add` inside `backend/`:
 
-| Package        | Purpose                          |
-|----------------|----------------------------------|
-| fastapi        | Web framework, builds the API    |
-| uvicorn        | Server that runs FastAPI         |
-| asyncpg        | Connects Python to PostgreSQL    |
-| python-dotenv  | Reads .env file                  |
+| Package           | Purpose                            |
+|-------------------|------------------------------------|
+| fastapi           | Web framework, builds the API      |
+| uvicorn           | Server that runs FastAPI           |
+| asyncpg           | Connects Python to PostgreSQL      |
+| python-dotenv     | Reads .env file                    |
+| email-validator   | Required by Pydantic for EmailStr  |
+| pydantic-settings | Handles .env and app settings      |
 
 ---
 
 ## What Has Been Written
 
 ### `backend/app/database.py` ✓
+Creates a connection pool to Supabase using asyncpg.
 
-Creates a connection pool to Supabase using asyncpg. Exposes:
-- `db` — global singleton Database instance
-- `db.connect()` — called on app startup to create the pool
-- `db.disconnect()` — called on app shutdown to close the pool
-- `get_db_connection()` — FastAPI dependency, hands one connection to a route that needs it
+### `backend/app/schemas/` ✓
+Pydantic models for `providers` and `products` (Create, Update, and Response formats).
+
+### `backend/app/models/` ✓
+SQL query functions for both resources (get_all, get_by_id, create, update, delete).
+
+### `backend/app/routers/` ✓
+FastAPI route handlers that connect the schemas and models to HTTP endpoints.
+
+### `backend/app/main.py` ✓
+Entry point: creates the app, handles database connection life cycle, and registers routers.
+
+### `frontend/src/` ✓
+- **Layout**: Shared navigation and structure.
+- **Routing**: React Router configured in `App.tsx`.
+- **Services**: `productService.ts` and `providerService.ts` ready for API calls.
+- **Types**: Full TypeScript interfaces for API responses and data models.
+- **Pages**: Initial structure for Dashboard, Products, and Providers.
 
 ---
 
 ## What Still Needs to Be Done
 
-### Backend — write in this order:
-
-1. **`backend/.env`** — fill in the DATABASE_URL from Supabase
-   ```
-   DATABASE_URL=postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres
-   SECRET_KEY=any_long_random_string
-   ENV_MODE=development
-   ```
-
-2. **`backend/app/schemas/providers.py`** — Pydantic models: ProviderCreate, ProviderUpdate, ProviderResponse
-
-3. **`backend/app/schemas/products.py`** — Pydantic models: ProductCreate, ProductUpdate, ProductResponse
-
-4. **`backend/app/models/providers.py`** — SQL query functions: get_all, get_one, create, update, delete
-
-5. **`backend/app/models/products.py`** — SQL query functions: get_all, get_one, create, update, delete
-
-6. **`backend/app/routers/providers.py`** — FastAPI route handlers for providers
-
-7. **`backend/app/routers/products.py`** — FastAPI route handlers for products (pagination, sorting, filtering, field selection)
-
-8. **`backend/app/main.py`** — entry point: creates FastAPI app, connects DB on startup, registers routers
-
-### Frontend (not started yet)
-- Restructure `src/` into `components/`, `pages/`, `services/`, `types/`
-- Create `frontend/.env` with `VITE_API_URL=http://127.0.0.1:8000`
-- Full CRUD UI for products and providers
+### Frontend (DONE ✓)
+- **Scaffolding**: Complete folder structure.
+- **Routing**: Full React Router configuration.
+- **Services**: All API calls for Products and Providers.
+- **CRUD Logic**: Create, Read, Update, and Delete implemented for all resources.
+- **UI/UX**: Clean layout with Sidebar, Tables, Modals, and consistent styling.
+- **Type Safety**: Full TypeScript integration with `export type` and `import type`.
 
 ### Deployment (optional, do last)
 - Backend → Render or Railway

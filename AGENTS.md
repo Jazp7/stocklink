@@ -146,11 +146,11 @@ Relationship: One provider → Many products (One-to-Many). `provider_id` is a F
 | File | Status |
 |------|--------|
 | `backend/app/database.py` | ✓ Done |
-| `backend/app/schemas/providers.py` | ✗ Pending |
-| `backend/app/schemas/products.py` | ✗ Pending |
-| `backend/app/models/providers.py` | ✗ Pending |
-| `backend/app/models/products.py` | ✗ Pending |
-| `backend/app/routers/providers.py` | ✗ Pending |
-| `backend/app/routers/products.py` | ✗ Pending |
-| `backend/app/main.py` | ✗ Pending |
-| `frontend/src/` | ✗ Not started |
+| `backend/app/schemas/providers.py` | ✓ Done |
+| `backend/app/schemas/products.py` | ✓ Done |
+| `backend/app/models/providers.py` | ✓ Done |
+| `backend/app/models/products.py` | ✓ Done |
+| `backend/app/routers/providers.py` | ✓ Done |
+| `backend/app/routers/products.py` | ✓ Done |
+| `backend/app/main.py` | ✓ Done |
+| `frontend/src/` | ✓ Scaffolded |

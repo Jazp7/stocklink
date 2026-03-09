@@ -18,10 +18,9 @@ router = APIRouter(prefix="/providers", tags=["Providers"])
 @router.get("/", response_model=ProviderListResponse)
 async def list_providers(conn: asyncpg.Connection = Depends(get_db_connection)):
     """Fetch all providers from the database."""
-    # We call the model function and get raw data.
     records = await providers_model.get_all(conn)
-    # The response_model automatically converts records into the schema format.
-    return {"success": True, "data": records}
+    # We convert each record to a dict so Pydantic can read it easily.
+    return {"success": True, "data": [dict(r) for r in records]}
 
 # GET /providers/{provider_id}: Get details for one provider.
 @router.get("/{provider_id}", response_model=ProviderResponse)
@@ -29,7 +28,6 @@ async def get_provider(provider_id: int, conn: asyncpg.Connection = Depends(get_
     """Fetch a single provider by ID."""
     record = await providers_model.get_by_id(conn, provider_id)
     if not record:
-        # If the provider doesn't exist, we send a 404 error in the correct JSON format.
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={
@@ -40,14 +38,14 @@ async def get_provider(provider_id: int, conn: asyncpg.Connection = Depends(get_
                 }
             }
         )
-    return {"success": True, "data": record}
+    return {"success": True, "data": dict(record)}
 
 # POST /providers: Create a new provider.
 @router.post("/", response_model=ProviderResponse, status_code=status.HTTP_201_CREATED)
 async def create_provider(provider: ProviderCreate, conn: asyncpg.Connection = Depends(get_db_connection)):
     """Add a new provider to the database."""
     record = await providers_model.create(conn, provider)
-    return {"success": True, "data": record}
+    return {"success": True, "data": dict(record)}
 
 # PUT /providers/{provider_id}: Update an existing provider.
 @router.put("/{provider_id}", response_model=ProviderResponse)
@@ -69,7 +67,7 @@ async def update_provider(
                 }
             }
         )
-    return {"success": True, "data": record}
+    return {"success": True, "data": dict(record)}
 
 # DELETE /providers/{provider_id}: Remove a provider.
 @router.delete("/{provider_id}", status_code=status.HTTP_200_OK)
