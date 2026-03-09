@@ -12,7 +12,7 @@ This file contains instructions for any AI agent (Gemini, Claude, Copilot, etc.)
 
 ## Rules for AI Agents
 
-1. **Always check the `Decisions/` folder before refactoring.** If you change a technology, a pattern, or a structural decision, document why in the `Decisions/` folder.
+1. **Always check the `decisions/` folder before refactoring.** If you change a technology, a pattern, or a structural decision, document why in the `decisions/` folder.
 2. **Never change the folder structure** without updating section 6 of the Notion notes and `README.md`.
 3. **Never add authentication or user login.** This project intentionally has no auth.
 4. **Always validate on both sides.** Backend uses Pydantic schemas. Frontend validates before sending requests.
@@ -23,13 +23,13 @@ This file contains instructions for any AI agent (Gemini, Claude, Copilot, etc.)
 
 ---
 
-## Tech Stack (Do Not Change Without Updating the Decisions/ Folder)
+## Tech Stack (Do Not Change Without Updating the decisions/ Folder)
 
-| Layer      | Technology              |
-|------------|-------------------------|
+| Layer      | Technology                     |
+|------------|--------------------------------|
 | Frontend   | React + TypeScript, Vite, pnpm |
-| Backend    | Python, FastAPI, uv     |
-| Database   | PostgreSQL via Supabase  |
+| Backend    | Python, FastAPI, uv            |
+| Database   | PostgreSQL via Supabase         |
 | Testing    | Vitest (frontend), Postman (API) |
 
 ---
@@ -50,8 +50,26 @@ stocklink/
 │   │   ├── models/     # Database query logic
 │   │   └── schemas/    # Pydantic models / validation
 ├── AGENTS.md
-├── Decisions/            # Architecture Decision Records
+├── HANDOFF.md
+├── decisions/          # Architecture Decision Records (one .md file per decision)
 └── README.md
+```
+
+---
+
+## How the Backend Fits Together
+
+```
+main.py           → starts the app, connects to DB, registers routers
+database.py       → connection pool to Supabase (asyncpg)
+schemas/          → Pydantic models: define what data looks like (validation)
+models/           → SQL query functions: talk to the database
+routers/          → FastAPI route handlers: receive requests, call models, return responses
+```
+
+Request lifecycle:
+```
+HTTP Request → router → calls model function → runs SQL via database.py → returns data → router sends JSON response
 ```
 
 ---
@@ -61,13 +79,10 @@ stocklink/
 Always follow this structure:
 
 ```json
-// Success
-{
-  "success": true,
-  "data": { ... }
-}
+// Success (single item)
+{ "success": true, "data": { ... } }
 
-// Success with pagination
+// Success (list with pagination)
 {
   "success": true,
   "data": [ ... ],
@@ -97,15 +112,15 @@ Always follow this structure:
 | Method | Endpoint           | Description              |
 |--------|--------------------|--------------------------|
 | GET    | /products          | List all products        |
-| GET    | /products/:id      | Get single product       |
-| POST   | /products          | Create product           |
-| PUT    | /products/:id      | Update product           |
-| DELETE | /products/:id      | Delete product           |
+| GET    | /products/{id}     | Get single product       |
+| POST   | /products          | Create new product       |
+| PUT    | /products/{id}     | Update existing product  |
+| DELETE | /products/{id}     | Delete product           |
 | GET    | /providers         | List all providers       |
-| GET    | /providers/:id     | Get single provider      |
-| POST   | /providers         | Create provider          |
-| PUT    | /providers/:id     | Update provider          |
-| DELETE | /providers/:id     | Delete provider          |
+| GET    | /providers/{id}    | Get single provider      |
+| POST   | /providers         | Create new provider      |
+| PUT    | /providers/{id}    | Update existing provider |
+| DELETE | /providers/{id}    | Delete provider          |
 
 ### Supported Query Parameters (GET list endpoints)
 - `page`, `limit` — pagination
@@ -123,3 +138,19 @@ products  (id, name, price, stock_quantity, category, description, provider_id �
 ```
 
 Relationship: One provider → Many products (One-to-Many). `provider_id` is a Foreign Key in `products`.
+
+---
+
+## Files Written So Far
+
+| File | Status |
+|------|--------|
+| `backend/app/database.py` | ✓ Done |
+| `backend/app/schemas/providers.py` | ✗ Pending |
+| `backend/app/schemas/products.py` | ✗ Pending |
+| `backend/app/models/providers.py` | ✗ Pending |
+| `backend/app/models/products.py` | ✗ Pending |
+| `backend/app/routers/providers.py` | ✗ Pending |
+| `backend/app/routers/products.py` | ✗ Pending |
+| `backend/app/main.py` | ✗ Pending |
+| `frontend/src/` | ✗ Not started |

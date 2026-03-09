@@ -18,7 +18,7 @@ Everything is AI-assisted. That is expected and acceptable.
 
 ---
 
-## Tech Stack (FINAL — do not change without updating the Decisions/ folder)
+## Tech Stack (FINAL — do not change without updating the decisions/ folder)
 
 | Layer    | Technology                          |
 |----------|-------------------------------------|
@@ -44,20 +44,20 @@ C:\Users\arist\Desktop\stocklink\
 │   ├── app/
 │   │   ├── models/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py
-│   │   │   └── providers.py
+│   │   │   ├── products.py     ← EMPTY, needs to be written
+│   │   │   └── providers.py    ← EMPTY, needs to be written
 │   │   ├── routers/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py
-│   │   │   └── providers.py
+│   │   │   ├── products.py     ← EMPTY, needs to be written
+│   │   │   └── providers.py    ← EMPTY, needs to be written
 │   │   ├── schemas/
 │   │   │   ├── __init__.py
-│   │   │   ├── products.py
-│   │   │   └── providers.py
+│   │   │   ├── products.py     ← EMPTY, needs to be written
+│   │   │   └── providers.py    ← EMPTY, needs to be written
 │   │   ├── __init__.py
-│   │   ├── database.py         ← EMPTY, needs to be written
+│   │   ├── database.py         ← ✓ DONE
 │   │   └── main.py             ← EMPTY, needs to be written
-│   ├── .env                    ← EMPTY, needs DATABASE_URL filled in
+│   ├── .env                    ← needs DATABASE_URL filled in
 │   ├── .gitignore
 │   ├── .python-version
 │   ├── pyproject.toml
@@ -77,11 +77,10 @@ C:\Users\arist\Desktop\stocklink\
 │   └── vite.config.ts
 ├── .gitignore
 ├── AGENTS.md
-├── Decisions/
+├── HANDOFF.md
+├── decisions/                  ← folder with one .md file per decision
 └── README.md
 ```
-
-> ⚠️ The extra `backend/main.py` (created by `uv init`) may still need to be deleted. The real one is at `backend/app/main.py`.
 
 ---
 
@@ -137,38 +136,46 @@ Installed via `uv add` inside `backend/`:
 
 ---
 
+## What Has Been Written
+
+### `backend/app/database.py` ✓
+
+Creates a connection pool to Supabase using asyncpg. Exposes:
+- `db` — global singleton Database instance
+- `db.connect()` — called on app startup to create the pool
+- `db.disconnect()` — called on app shutdown to close the pool
+- `get_db_connection()` — FastAPI dependency, hands one connection to a route that needs it
+
+---
+
 ## What Still Needs to Be Done
 
-### Backend (next immediate step)
+### Backend — write in this order:
 
-Write these files in order:
-
-1. **`backend/.env`** — add the `DATABASE_URL` from Supabase
+1. **`backend/.env`** — fill in the DATABASE_URL from Supabase
    ```
    DATABASE_URL=postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres
    SECRET_KEY=any_long_random_string
    ENV_MODE=development
    ```
 
-2. **`backend/app/database.py`** — connection pool to Supabase using asyncpg
+2. **`backend/app/schemas/providers.py`** — Pydantic models: ProviderCreate, ProviderUpdate, ProviderResponse
 
-3. **`backend/app/schemas/providers.py`** — Pydantic models for providers (ProviderCreate, ProviderUpdate, ProviderResponse)
+3. **`backend/app/schemas/products.py`** — Pydantic models: ProductCreate, ProductUpdate, ProductResponse
 
-4. **`backend/app/schemas/products.py`** — Pydantic models for products (ProductCreate, ProductUpdate, ProductResponse)
+4. **`backend/app/models/providers.py`** — SQL query functions: get_all, get_one, create, update, delete
 
-5. **`backend/app/models/providers.py`** — SQL query functions for providers (get_all, get_one, create, update, delete)
+5. **`backend/app/models/products.py`** — SQL query functions: get_all, get_one, create, update, delete
 
-6. **`backend/app/models/products.py`** — SQL query functions for products (get_all, get_one, create, update, delete)
+6. **`backend/app/routers/providers.py`** — FastAPI route handlers for providers
 
-7. **`backend/app/routers/providers.py`** — FastAPI route handlers for providers
+7. **`backend/app/routers/products.py`** — FastAPI route handlers for products (pagination, sorting, filtering, field selection)
 
-8. **`backend/app/routers/products.py`** — FastAPI route handlers for products (with pagination, sorting, filtering, field selection)
-
-9. **`backend/app/main.py`** — FastAPI app entry point, registers routers, sets up DB connection
+8. **`backend/app/main.py`** — entry point: creates FastAPI app, connects DB on startup, registers routers
 
 ### Frontend (not started yet)
-- Needs `src/` folder restructured into `components/`, `pages/`, `services/`, `types/`
-- Needs `frontend/.env` with `VITE_API_URL=http://127.0.0.1:8000`
+- Restructure `src/` into `components/`, `pages/`, `services/`, `types/`
+- Create `frontend/.env` with `VITE_API_URL=http://127.0.0.1:8000`
 - Full CRUD UI for products and providers
 
 ### Deployment (optional, do last)
@@ -178,7 +185,47 @@ Write these files in order:
 
 ---
 
-## API Response Format (MUST follow always)
+## How the Backend Files Connect
+
+```
+main.py
+  → on startup: calls db.connect()
+  → registers: routers/products.py and routers/providers.py
+
+routers/products.py
+  → receives HTTP request (e.g. GET /products)
+  → calls a function from models/products.py
+  → passes db connection from database.py
+
+models/products.py
+  → runs raw SQL against Supabase via asyncpg connection
+  → returns data to the router
+
+schemas/products.py
+  → Pydantic models that validate request bodies and shape responses
+  → used by routers to auto-validate incoming JSON
+```
+
+---
+
+## How to Run (once backend code is written)
+
+```bash
+# Backend
+cd C:\Users\arist\Desktop\stocklink\backend
+uv run uvicorn app.main:app --reload
+# → http://127.0.0.1:8000
+# → interactive docs at http://127.0.0.1:8000/docs
+
+# Frontend
+cd C:\Users\arist\Desktop\stocklink\frontend
+pnpm dev
+# → http://localhost:5173
+```
+
+---
+
+## API Response Format (MUST always follow)
 
 ```json
 // Success (single item)
@@ -209,46 +256,6 @@ Write these files in order:
 
 ---
 
-## API Endpoints to Implement
-
-| Method | Endpoint        | Description           |
-|--------|-----------------|-----------------------|
-| GET    | /products       | List all products     |
-| GET    | /products/{id}  | Get single product    |
-| POST   | /products       | Create product        |
-| PUT    | /products/{id}  | Update product        |
-| DELETE | /products/{id}  | Delete product        |
-| GET    | /providers      | List all providers    |
-| GET    | /providers/{id} | Get single provider   |
-| POST   | /providers      | Create provider       |
-| PUT    | /providers/{id} | Update provider       |
-| DELETE | /providers/{id} | Delete provider       |
-
-### Query parameters for GET list endpoints
-- `page`, `limit` — pagination
-- `sort` — e.g. `?sort=price` or `?sort=-price` (descending)
-- `fields` — e.g. `?fields=id,name,price`
-- `name`, `category`, `price[gte]`, `price[lte]` — filtering
-
----
-
-## How to Run (once backend code is written)
-
-```bash
-# Backend
-cd C:\Users\arist\Desktop\stocklink\backend
-uv run uvicorn app.main:app --reload
-# → runs at http://127.0.0.1:8000
-# → auto docs at http://127.0.0.1:8000/docs
-
-# Frontend
-cd C:\Users\arist\Desktop\stocklink\frontend
-pnpm dev
-# → runs at http://localhost:5173
-```
-
----
-
 ## Key Decisions Summary
 
 | Decision | Choice | Why |
@@ -260,14 +267,14 @@ pnpm dev
 | Auth | None | Not required by assessment |
 | Python pkg manager | uv | Fast, handles venv automatically |
 
-Full rationale + change implications in the `Decisions/` folder.
+Full rationale + change implications in the `decisions/` folder.
 
 ---
 
 ## Important Notes for AI Agents
 
 - Always read `AGENTS.md` before writing or changing code
-- Always check the `Decisions/` folder before refactoring
+- Always check the `decisions/` folder before refactoring
 - Never use `float` for price — always `DECIMAL` / `Decimal`
 - Never hardcode secrets — always use `.env`
 - The student is a beginner — explain what code does, don't just write it
