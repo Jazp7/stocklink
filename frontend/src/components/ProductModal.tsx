@@ -1,7 +1,7 @@
 // ProductModal.tsx — Modal with a form to add OR edit a product
 import React, { useEffect, useState } from 'react';
-import type { Product, ProductCreate } from '../types/product';
-import type { Provider } from '../types/provider';
+import type { Product, ProductCreate } from '../types/productTypes';
+import type { Provider } from '../types/providerTypes';
 import { providerService } from '../services/providerService';
 
 interface ProductModalProps {
@@ -32,7 +32,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
           price: initialData.price,
           stock_quantity: initialData.stock_quantity,
           category: initialData.category,
-          provider_id: initialData.provider_id,
+          // Use || 0 to handle null provider_id safely
+          provider_id: initialData.provider_id || 0,
           description: initialData.description || ''
         });
       } else {
@@ -52,7 +53,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
   const loadProviders = async () => {
     setLoadingProviders(true);
     try {
-      const response = await providerService.getAll();
+      const response = await providerService.getAll(1, 100); // Get more providers for the dropdown
       if (response.success) {
         setProviders(response.data);
         if (response.data.length > 0 && formData.provider_id === 0) {
@@ -136,7 +137,9 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
               value={formData.provider_id}
               onChange={e => setFormData({...formData, provider_id: parseInt(e.target.value)})}
             >
-              <option value="" disabled>Select a provider</option>
+              <option value="0" disabled={!initialData}>
+                {initialData && !initialData.provider_id ? "No Provider (Select One)" : "Select a provider"}
+              </option>
               {providers.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 import asyncpg
+import math
 from typing import List
 from ..database import get_db_connection
 from ..models import providers as providers_model
@@ -10,17 +11,37 @@ from ..schemas.providers import (
     ProviderResponse, 
     ProviderListResponse
 )
+from ..schemas.api import PaginationInfo
 
 # We create an APIRouter to group all /providers endpoints.
 router = APIRouter(prefix="/providers", tags=["Providers"])
 
-# GET /providers: List all providers.
+# GET /providers: List all providers with pagination.
 @router.get("/", response_model=ProviderListResponse)
-async def list_providers(conn: asyncpg.Connection = Depends(get_db_connection)):
-    """Fetch all providers from the database."""
-    records = await providers_model.get_all(conn)
-    # We convert each record to a dict so Pydantic can read it easily.
-    return {"success": True, "data": [dict(r) for r in records]}
+async def list_providers(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    conn: asyncpg.Connection = Depends(get_db_connection)
+):
+    """Fetch all providers from the database with pagination."""
+    offset = (page - 1) * limit
+
+    # Get the data and the total count
+    records = await providers_model.get_all(conn, limit, offset)
+    total_items = await providers_model.get_total_count(conn)
+    
+    total_pages = math.ceil(total_items / limit) if total_items > 0 else 0
+
+    return {
+        "success": True, 
+        "data": [dict(r) for r in records],
+        "pagination": {
+            "page": page,
+            "limit": limit,
+            "total_items": total_items,
+            "total_pages": total_pages
+        }
+    }
 
 # GET /providers/{provider_id}: Get details for one provider.
 @router.get("/{provider_id}", response_model=ProviderResponse)
@@ -72,7 +93,7 @@ async def update_provider(
 # DELETE /providers/{provider_id}: Remove a provider.
 @router.delete("/{provider_id}", status_code=status.HTTP_200_OK)
 async def delete_provider(provider_id: int, conn: asyncpg.Connection = Depends(get_db_connection)):
-    """Delete a provider by ID."""
+    """Delete a provider by ID and return True if successful."""
     success = await providers_model.delete(conn, provider_id)
     if not success:
         raise HTTPException(

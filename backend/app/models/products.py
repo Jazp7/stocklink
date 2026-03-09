@@ -2,11 +2,17 @@ import asyncpg
 from typing import List, Optional
 from ..schemas.products import ProductCreate, ProductUpdate
 
-# Fetch all products from the database.
-async def get_all(conn: asyncpg.Connection) -> List[asyncpg.Record]:
-    """Fetch all products, showing newest ones first."""
-    # Simple query for now, but we'll add filtering later.
-    return await conn.fetch("SELECT * FROM products ORDER BY created_at DESC")
+# Fetch all products from the database with pagination.
+async def get_all(conn: asyncpg.Connection, limit: int = 10, offset: int = 0) -> List[asyncpg.Record]:
+    """Fetch all products, showing oldest ones first, with pagination."""
+    query = "SELECT * FROM products ORDER BY created_at ASC LIMIT $1 OFFSET $2"
+    return await conn.fetch(query, limit, offset)
+
+# Get the total number of products for pagination.
+async def get_total_count(conn: asyncpg.Connection) -> int:
+    """Return the total number of products in the database."""
+    count = await conn.fetchval("SELECT COUNT(*) FROM products")
+    return count
 
 # Fetch a single product by its unique ID.
 async def get_by_id(conn: asyncpg.Connection, product_id: int) -> Optional[asyncpg.Record]:
@@ -16,8 +22,6 @@ async def get_by_id(conn: asyncpg.Connection, product_id: int) -> Optional[async
 # Create a new product.
 async def create(conn: asyncpg.Connection, product: ProductCreate) -> asyncpg.Record:
     """Insert a new product and return the record."""
-    # This query matches the 'products' table schema.
-    # provider_id connects this product to a specific provider.
     query = """
         INSERT INTO products (name, price, stock_quantity, category, description, provider_id)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -36,8 +40,6 @@ async def create(conn: asyncpg.Connection, product: ProductCreate) -> asyncpg.Re
 # Update an existing product's fields.
 async def update(conn: asyncpg.Connection, product_id: int, product: ProductUpdate) -> Optional[asyncpg.Record]:
     """Update fields of an existing product."""
-    # Just like with providers, we only want to update fields 
-    # that the user actually sent us.
     update_data = product.model_dump(exclude_unset=True)
     if not update_data:
         return await get_by_id(conn, product_id)

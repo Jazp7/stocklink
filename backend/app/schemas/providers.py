@@ -44,7 +44,10 @@ class ProviderResponse(BaseModel):
     success: bool = True
     data: Provider
 
+from .api import PaginationInfo
+
 # ProviderListResponse: Same as above, but for when we return a LIST of providers.
 class ProviderListResponse(BaseModel):
     success: bool = True
     data: List[Provider]
+    pagination: Optional[PaginationInfo] = None
