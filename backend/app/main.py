@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .database import db
-from .routers import providers, products
+from .routers import providers, products, dashboard # Added dashboard
 
 # This @asynccontextmanager handles the life cycle of the app.
 @asynccontextmanager
@@ -24,8 +24,6 @@ app = FastAPI(
 )
 
 # Configure CORS
-# This allows the React frontend (running on port 5173) to talk to this API.
-# We include both localhost and 127.0.0.1 just in case.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -33,13 +31,14 @@ app.add_middleware(
         "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
-    allow_methods=["*"], # Allows GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"], # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include our routers. 
 app.include_router(providers.router)
 app.include_router(products.router)
+app.include_router(dashboard.router) # Added dashboard
 
 # A simple "Health Check" endpoint.
 @app.get("/")
