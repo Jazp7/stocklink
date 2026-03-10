@@ -17,7 +17,7 @@ class Database:
             raise ValueError("DATABASE_URL is not set. Please check your .env file.")
         
         # Create a connection pool that will hold a set of active connections
-        self.pool = await asyncpg.create_pool(dsn="postgresql://postgres.wnddyyjwocqgcuuxjxvb:pt7byHgmuojNZAZ6@aws-0-us-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true")
+        self.pool = await asyncpg.create_pool(dsn=DATABASE_URL)
 
     async def disconnect(self):
         """Close all connections in the pool."""
