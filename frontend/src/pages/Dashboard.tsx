@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { dashboardService } from '../services/dashboardService';
 import type { DashboardStats } from '../services/dashboardService';
-import { LayoutDashboard, Users, Package, AlertTriangle, BadgeDollarSign, ArchiveX } from 'lucide-react';
+import { Users, Package, AlertTriangle, BadgeDollarSign, ArchiveX } from 'lucide-react';
 import '../App.css';
 
 const Dashboard: React.FC = () => {

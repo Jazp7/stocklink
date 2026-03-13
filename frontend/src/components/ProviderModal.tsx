@@ -1,6 +1,6 @@
 // ProviderModal.tsx — Modal with a form to add OR edit a provider
 import React, { useEffect, useState } from 'react';
-import type { Provider, ProviderCreate } from '../types/provider';
+import type { Provider, ProviderCreate } from '../types/providerTypes';
 
 interface ProviderModalProps {
   isOpen: boolean;

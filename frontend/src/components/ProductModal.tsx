@@ -22,7 +22,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
   });
 
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [loadingProviders, setLoadingProviders] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,7 +50,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
   }, [isOpen, initialData]);
 
   const loadProviders = async () => {
-    setLoadingProviders(true);
     try {
       const response = await providerService.getAll(1, 100); // Get more providers for the dropdown
       if (response.success) {
@@ -62,8 +60,6 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSave, in
       }
     } catch (err) {
       console.error("Failed to load providers", err);
-    } finally {
-      setLoadingProviders(false);
     }
   };
 
