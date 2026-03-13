@@ -6,10 +6,6 @@ from .database import db
 from .routers import providers, products, dashboard # Added dashboard
 from dotenv import load_dotenv
 
-load_dotenv()
-
-FRONTEND_URL = os.getenv("FRONTEND_URL")
-
 # This @asynccontextmanager handles the life cycle of the app.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,7 +31,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        f"{FRONTEND_URL}"
+        "https://stocklink-nine.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
