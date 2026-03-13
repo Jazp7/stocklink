@@ -2,7 +2,7 @@
 import type { ApiResponse } from '../types/apiTypes';
 import type { Product, ProductCreate, ProductUpdate } from '../types/productTypes';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const productService = {
   async getAll(page: number = 1, limit: number = 10): Promise<ApiResponse<Product[]>> {

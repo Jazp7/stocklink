@@ -1,7 +1,7 @@
 // dashboardService.ts — Functions to fetch statistics for the dashboard
 import type { ApiResponse } from '../types/apiTypes';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export type DashboardStats = {
   total_products: number;

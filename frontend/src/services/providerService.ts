@@ -2,7 +2,7 @@
 import type { ApiResponse } from '../types/apiTypes';
 import type { Provider, ProviderCreate, ProviderUpdate } from '../types/providerTypes';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const providerService = {
   async getAll(page: number = 1, limit: number = 10): Promise<ApiResponse<Provider[]>> {
